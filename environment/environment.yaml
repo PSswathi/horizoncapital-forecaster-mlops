@@ -1,0 +1,24 @@
+name: sagemaker_env
+
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - jupyter
+  - jupyterlab
+  - pandas
+  - numpy
+  - matplotlib
+  - seaborn
+  - scikit-learn
+  - sqlalchemy
+  - ipykernel  # Add ipykernel to conda dependencies
+  - awscli
+  - pip:
+    - PyAthena[SQLAlchemy]
+    - boto3
+    - sagemaker<3
+    - awswrangler
+    - python-dotenv
