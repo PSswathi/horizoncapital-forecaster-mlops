@@ -1,8 +1,8 @@
-def add_lags(df, cols, lags=(1,3,6,12)):
+﻿def add_lags(df, cols, lags=(1,3,6,12)):
     df = df.copy()
     for c in cols:
-        for l in lags:
-            df[f"{c}_lag{l}"] = df[c].shift(l)
+        for lag in lags:
+            df[f"{c}_lag{lag}"] = df[c].shift(lag)
     return df
 
 def add_rolling(df, cols, windows=(3,6,12)):
