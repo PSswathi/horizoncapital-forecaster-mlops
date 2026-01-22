@@ -1,8 +1,5 @@
-# Horizon Capital Forecaster MLOps
+# horizoncapital-forecaster-mlops
 Build and deploy an AWS SageMaker MLOps pipeline that forecasts bank capital-planning risk metrics 6–24 months ahead using integrated macroeconomic (FRED), demographic (Census), and financial time-series data, with backtesting and interpretable driver insights.
-
-## Architectural Diagram
-![Horizon Capital Forecasting Architecture](architectural-design/Horizon_Capital_architecture.png)
 
 ## PROJECT STATUS -  In Progress
 
