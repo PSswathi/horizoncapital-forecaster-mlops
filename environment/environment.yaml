@@ -22,3 +22,5 @@ dependencies:
     - sagemaker<3
     - awswrangler
     - python-dotenv
+    - xgboost 
+    - shap
