@@ -66,10 +66,10 @@ MODEL_NAME = "nfci-xgboost"
 
 # Data split ratios
 SPLIT_RATIOS = {
-    "train": 0.40,
+    "train": 0.60,
     "validation": 0.10,
     "test": 0.10,
-    "production": 0.40,
+    "production": 0.20,
 }
 
 # glue and athena
