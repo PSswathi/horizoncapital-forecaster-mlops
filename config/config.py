@@ -24,6 +24,8 @@ AWS_REGION = "us-east-1"
 # Bucket name follows pattern: nfci-forecasting-{account-id}
 BUCKET_NAME = f"nfci-forecasting-{get_account_id()}"
 
+TRAINING_PREFIX = "nfci-xgboost-regression"
+
 # S3 Prefixes (folder structure)
 S3_PREFIX = {
     # Data prefixes

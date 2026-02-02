@@ -18,9 +18,11 @@ dependencies:
   - awscli
   - pip:
     - PyAthena[SQLAlchemy]
-    - boto3
+    - boto3>=1.26
     - sagemaker<3
     - awswrangler
     - python-dotenv
     - xgboost 
     - shap
+    - s3fs
+    - botocore>=1.29
