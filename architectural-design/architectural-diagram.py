@@ -1,106 +1,100 @@
 """
-Horizon Capital Forecasting System - AWS Architecture Diagram
+NFCI Forecasting System - AWS Architecture Diagram
 """
 
 from diagrams import Diagram, Cluster, Edge
 from diagrams.aws.storage import S3
-from diagrams.aws.analytics import Glue, Athena, GlueCrawlers, GlueDataCatalog
+from diagrams.aws.analytics import GlueCrawlers, GlueDataCatalog, Athena
 from diagrams.aws.ml import Sagemaker, SagemakerModel, SagemakerTrainingJob
-from diagrams.aws.integration import StepFunctions
 from diagrams.aws.management import Cloudwatch
-from diagrams.aws.general import GenericDatabase
-from diagrams.onprem.client import User
-from diagrams.programming.language import Python
-from diagrams.onprem.ci import GithubActions
-
+from diagrams.aws.general import User
 
 graph_attr = {
-    "fontsize": "16",
+    "fontsize": "24",
     "bgcolor": "white",
-    "pad": "0.4",
-    "nodesep": "0.4",
-    "ranksep": "0.6",
+    "pad": "0.5",
 }
 
 with Diagram(
-    "Horizon Capital Forecasting System - AWS Architecture",
-    filename="Horizon_Capital_architecture",
+    "NFCI Forecasting System - AWS Architecture",
     show=False,
-    direction="LR",
+    direction="TB",
+    filename="HorizonCapital_NFCI_Architecture",
+    outformat="png",
     graph_attr=graph_attr,
 ):
+    user = User("Data Science\nTeam")
 
+    # s3 data lake cluster
+    with Cluster("S3 Data Lake"):
+        s3_raw = S3("Raw Data")
+        s3_features = S3("Features")
+        s3_training = S3("Training Data")
+        s3_models = S3("Model Artifacts")
+        s3_predictions = S3("Predictions")
 
-# USER
-    user = User("Data Science Team")
-
-    # S3 DATA LAKE 
-    with Cluster("S3 Data Lake\n(Data Pre-loaded)"):
-        s3_cleaned = S3("cleaned_dataset.csv\n11,400 rows × 39 cols")
-        s3_features = S3("features/\ntraining_features/")
-        s3_models = S3("models/\nartifacts/")
-        s3_forecasts = S3("forecasts/\nnfci_predictions/")
-
-    # data catalog
-    with Cluster("Data Catalog (Optional)"):
+    # data catalog cluster
+    with Cluster("Data Catalog"):
         glue_crawler = GlueCrawlers("Glue Crawler")
         glue_catalog = GlueDataCatalog("Glue Catalog")
-        athena = Athena("Athena\n(Ad-hoc Queries)")
+        athena = Athena("Athena")
 
-    # sagemaker ml platform
+    # sagemaker ML platform cluster
     with Cluster("SageMaker ML Platform"):
         
         with Cluster("Feature Engineering"):
-            sm_processing = Sagemaker("Processing Job\n- Collapse to national\n- Lag features\n- Rolling stats")
-
-        sm_feature_store = Sagemaker("Feature Store\n(Offline)")
+            processing = Sagemaker("Processing Job")
         
         with Cluster("Model Training"):
-            sm_training = SagemakerTrainingJob("Training Job\n(XGBoost)")
-            sm_experiments = Sagemaker("Experiments")
-
+            training = SagemakerTrainingJob("Training Job\n(DeepAR)")
+            experiments = Sagemaker("Experiments")
+        
         with Cluster("Model Management"):
-            sm_registry = SagemakerModel("Model Registry")
-
+            feature_store = Sagemaker("Feature Store")
+            registry = Sagemaker("Model Registry")
+        
         with Cluster("Batch Inference"):
-            sm_batch = Sagemaker("Batch Transform")
-
+            batch_transform = Sagemaker("Batch Transform")
+        
         with Cluster("Monitoring"):
-            sm_monitor = Sagemaker("Model Monitor")
+            model_monitor = Sagemaker("Model Monitor")
 
-    #  orchestration
-    sm_pipelines = StepFunctions("SageMaker\nPipelines")
+    
+    # Model monitoring and alerting (cloudwatch)
+    
     cloudwatch = Cloudwatch("CloudWatch")
 
-    # ========== CONNECTIONS ==========
-    
-    # User uploads cleaned data
-    user >> s3_cleaned
-    
-    # Data catalog 
-    s3_cleaned >> glue_crawler >> glue_catalog >> athena
-    
-    # ML Pipeline: Feature Engineering
-    s3_cleaned >> sm_processing >> s3_features
-    s3_features >> sm_feature_store
-    
-    # ML Pipeline: Training
-    sm_feature_store >> sm_training
-    sm_training >> sm_experiments
-    sm_training >> s3_models
-    s3_models >> sm_registry
-    
-    # ML Pipeline: Inference
-    sm_registry >> sm_batch
-    sm_feature_store >> sm_batch
-    sm_batch >> s3_forecasts
+    # Pipeline orchestration (SageMaker Pipelines)
+    pipelines = Sagemaker("SageMaker\nPipelines")
+
+    # connections
+
+    # User interactions
+    user >> s3_raw
+    user >> athena
+
+    # Data catalog flow
+    s3_raw >> glue_crawler >> glue_catalog >> athena
+
+    # ML Pipeline flow
+    s3_raw >> processing
+    processing >> s3_features
+    processing >> feature_store
+    s3_features >> training
+    training >> experiments
+    training >> s3_models
+    s3_models >> registry
+    registry >> batch_transform
+    batch_transform >> s3_predictions
     
     # Monitoring
-    sm_batch >> sm_monitor >> cloudwatch
-    
-    # Orchestration (dashed blue lines)
-    sm_pipelines >> Edge(style="dashed", color="blue") >> sm_processing
-    sm_pipelines >> Edge(style="dashed", color="blue") >> sm_training
-    sm_pipelines >> Edge(style="dashed", color="blue") >> sm_batch
-   
-print("Diagram generated: Horizon_Capital_architecture.png")
+    batch_transform >> model_monitor
+    model_monitor >> cloudwatch
+
+    # Pipeline orchestration (dashed lines)
+    pipelines >> Edge(style="dashed") >> processing
+    pipelines >> Edge(style="dashed") >> training
+    pipelines >> Edge(style="dashed") >> batch_transform
+    pipelines >> Edge(style="dashed") >> registry
+
+print("Diagram generated: HorizonCapital_NFCI_Architecture.png")
